@@ -11,6 +11,8 @@ arr.Print.Show();
 
 internal class JsArray<T> : IEnumerable<T>
 {
+    //TODO Last and First method can be adding
+    
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private Dictionary<int, T> _items = [];
 
