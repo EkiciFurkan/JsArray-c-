@@ -1,20 +1,22 @@
 ﻿using System.Collections;
 
 var arr = new JsArray<string>();
-arr.Push("Banana");
-arr.Push("Apple");
-arr.Push(100_000, "osman");
 
-Console.WriteLine(arr[100]);
+arr.Push("Elma");
+arr.Push("Armut");
+arr.Push("Muz");
 
 arr.Print.Show();
 
 internal class JsArray<T> : IEnumerable<T>
 {
-    //TODO Last and First method can be adding
-    
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private Dictionary<int, T> _items = [];
+    
+    private bool IsEmpty()
+    {
+        return _items.Count != 0;
+    }
 
     public PrintExtensions Print => new(this);
 
@@ -39,10 +41,10 @@ internal class JsArray<T> : IEnumerable<T>
             {
                 throw new KeyNotFoundException($"The key '{index}' was not found in the dictionary.");
             }
-        
+
             return item;
         }
-        
+
         set => _items[index] = value;
     }
 
@@ -77,7 +79,7 @@ internal class JsArray<T> : IEnumerable<T>
 
     public void Clear() => _items.Clear();
 
-    private int NextIndex => _items.Count == 0 ? 0 : _items.Count;
+    private int NextIndex => !IsEmpty() ? 0 : _items.Count;
 
     public class PrintExtensions(JsArray<T> parent)
     {
@@ -90,7 +92,7 @@ internal class JsArray<T> : IEnumerable<T>
                 Console.WriteLine($"{key} : {value}");
             }
         }
-        
+
         public IEnumerable<int> GetKeys()
         {
             var keys = parent._items.Keys;
@@ -102,7 +104,62 @@ internal class JsArray<T> : IEnumerable<T>
             var keys = parent._items.Values;
             return keys.ToList();
         }
-        
+    }
+
+    // ReSharper disable once MemberCanBePrivate.Global
+    public int GetFirstKey => _items.First().Key;
+
+    // ReSharper disable once MemberCanBePrivate.Global
+    public T GetFirstValue => _items.First().Value;
+
+    public int GetLastKey => _items.Last().Key;
+
+    public T GetLastValue => _items.Last().Value;
+
+    public TResult GetFirstElement<TResult>()
+    {
+        if (!IsEmpty())
+        {
+            throw new InvalidOperationException("The collection is empty. Cannot retrieve the first element.");
+        }
+
+        var firstKey = GetFirstKey;
+        var firstValue = GetFirstValue;
+
+        if (typeof(TResult) == typeof(string))
+        {
+            return (TResult)(object)$"{firstKey} : {firstValue}";
+        }
+
+        if (typeof(TResult) == typeof(Dictionary<int, T>))
+        {
+            return (TResult)(object)new Dictionary<int, T> { { firstKey, firstValue } };
+        }
+
+        throw new ArgumentException("Unexpected return type. Please provide a valid return type.");
+    }
+    
+    public TResult GetLastElement<TResult>()
+    {
+        if (!IsEmpty())
+        {
+            throw new InvalidOperationException("The collection is empty. Cannot retrieve the first element.");
+        }
+
+        var lastKey = GetLastKey;
+        var lastValue = GetLastValue;
+
+        if (typeof(TResult) == typeof(string))
+        {
+            return (TResult)(object)$"{lastKey} : {lastValue}";
+        }
+
+        if (typeof(TResult) == typeof(Dictionary<int, T>))
+        {
+            return (TResult)(object)new Dictionary<int, T> { { lastKey, lastValue } };
+        }
+
+        throw new ArgumentException("Unexpected return type. Please provide a valid return type.");
     }
     
     public IEnumerator<T> GetEnumerator()
